@@ -1,4 +1,8 @@
 extern crate time;
+extern crate crypto;
+
+use self::crypto::digest::Digest;
+use self::crypto::sha2::Sha256;
 
 pub struct Blockchain {
     tail: Block,
@@ -15,7 +19,7 @@ pub struct Block {
 impl Block {
     fn new(parent: Block) -> Block {
         let new_block = Block {
-            parent.index() + 1,
+            index: parent.index() + 1,
             hash: "",
             parent_hash: parent.hash(),
             timestamp: "", // get current time
@@ -28,7 +32,7 @@ impl Block {
         self.index
     }
 
-    fn hash(&self) -> &str {
+    fn hash(&self) -> &]tr {
         self.hash
     }
 
@@ -38,6 +42,19 @@ impl Block {
 
     fn timestamp(&self) {
         self.timestamp
+    }
+
+    /** Compute my own hash. */
+    fn compute_hash(&self) -> str{
+        let mut hasher = Sha256::new();
+        let key: str = vec![&self.index.to_string(),
+                            self.parent_hash(),
+                            self.timestamp(),
+                            self.meta.to_string()
+        ].join("|");
+        
+        hasher.input_str(key);
+        hasher.result_str()
     }
 }
 
@@ -54,6 +71,12 @@ struct Metadata {
 impl Metadata {
     fn new() -> Metadata {
         Metadata{}
+    }
+}
+
+impl Metadata {
+    fn to_string(&self) {
+        "metadata"
     }
 }
 
