@@ -1,3 +1,4 @@
+extern crate Oxide;
 extern crate time;
 extern crate crypto;
 
