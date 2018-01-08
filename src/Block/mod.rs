@@ -1,103 +1,113 @@
-extern crate Oxide;
 extern crate time;
 extern crate crypto;
 
+use crypto::sha2::Sha256;
+use crypto::digest::Digest;
+use serde::Deserialize;
+use serde::Serialize;
 
 
-
-
+#[derive(Serialize, Deserialize)]
 pub struct Block {
     index: u32,
-    hash: Option<str>,
-    parent_hash: Option<str>,
-    timestamp: str,
-    meta: Metadata
-}
-
-const GENESIS_BLOCK: Block = Block {
-    index: 0;
-    hash: "Genesis block.",
-    parent_hash: None,
-    timestamp: "Sat, 30 Dec 2017 08:19:06 +0000",
-    meta: Meta::blank() //no metadata for the genesis block.
+    hash: String,
+    parent_hash: String,
+    timestamp: String,
+    meta: Metadata,
+    nonce: i32
 }
 
 impl Block {
-    fn new(parent: Block) -> Block {
-        let new_block = Block {
-            index: parent.index() + 1,
-            hash: None,
-            parent_hash: parent.hash(),
-            timestamp: "", // get current time
-            meta: Meta::new() // new metadata
-        }
+    pub fn new(parent: Block, nonce: i32) -> Block {
+        let index: u32 = parent.index() + 1;
+        let parent_hash = String::from(parent.hash());
+        let timestamp = String::from(""); //get current time
+        let meta = Metadata::new();
+        let mut hasher = Sha256::new();
 
-        new_block.set_hash();
+        let key = vec![index.to_string(),
+                               parent_hash.clone(),
+                               timestamp.clone(),
+                               meta.to_string(),
+                               nonce.to_string()
+        ].join("|");
+        
+        hasher.input_str(&key[..]);
+        let hash = hasher.result_str();
+
+        Block {
+            index,
+            hash,
+            parent_hash,
+            timestamp,
+            meta,
+            nonce
+        }
     }
 
-    fn index(&self) -> u32 { //no lifetime annotation b/c u32 implements Move?
+    pub fn genesis() -> Block {
+        let index = 0;
+        let parent_hash = String::from("GENESIS");
+        let timestamp = String::from("Sun, 07 Jan 2018 06:23:23 GMT");
+        let meta = Metadata::new();
+        let nonce = 0;
+        let hash = String::from("GENESIS");
+
+        return Block {
+            index,
+            hash,
+            parent_hash,
+            timestamp,
+            meta,
+            nonce
+        }
+    }
+}
+
+impl Block {
+    pub fn index(&self) -> u32 {
         self.index
     }
 
-    fn hash(&self) -> &]tr {
-        self.hash
+    pub fn hash(&self) -> &str {
+        &self.hash
     }
 
-    fn parent_hash(&self) {
-        self.parent_hash
+    pub fn parent_hash(&self) -> &str {
+        &self.parent_hash
     }
 
-    fn timestamp(&self) {
-        self.timestamp
-    }
-
-    /** Compute and set my own hash. */
-    fn set_hash(&self) -> Result<str>{
-        if let self.hash = Some(str) {
-            Err("Hash already set")
-        }
-
-        let mut hasher = Sha256::new();
-        let key: str = vec![&self.index.to_string(),
-                            self.parent_hash(),
-                            self.timestamp(),
-                            self.meta.to_string()
-        ].join("|");
-        
-        hasher.input_str(key);
-        self.hash = hasher.result_str())
-
-        Ok("Hash set")
+    pub fn timestamp(&self) -> &str {
+        &self.timestamp
     }
 }
 
-impl Block {
-
-    /** Serialize myself. */
-    fn serialize(&self) {
-
-    }
-}
-
+#[derive(Serialize, Deserialize)]
 struct Metadata {
 }
 
 impl Metadata {
     fn new() -> Metadata {
-        blank()
+        Metadata {}
     }
 
     fn blank() -> Metadata {
-        Metadata{}
+        Self::new()
+    }
+
+    /** The metadata for the genesis block. */
+    fn genesis() -> Metadata {
+        Self::new()
     }
 }
 
-impl Metadata {
-    fn to_string(&self) {
-        "metadata"
+impl ToString for Metadata {
+    fn to_string(&self) -> String {
+        String::from("metadata")
     }
 }
 
+#[derive(Serialize, Deserialize)]
 struct Transaction {
 }
 
