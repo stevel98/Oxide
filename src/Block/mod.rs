@@ -7,7 +7,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Block {
     index: u32,
     hash: String,
@@ -82,7 +82,7 @@ impl Block {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 struct Metadata {
 }
 
